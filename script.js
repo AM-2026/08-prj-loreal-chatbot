@@ -8,12 +8,23 @@ const initialMessage = "👋 Hello! How can I help you today?";
 chatWindow.textContent = ""; // Clear any previous content
 chatWindow.innerHTML += `<div class="bot-message"><strong>Bot:</strong> ${initialMessage}</div>`;
 
-/* Handle form submit */
+// Track the conversation history
+const messages = [
+  {
+    role: "system",
+    content:
+      "You are a very friendly and professional assistant for L'Oréal. Always greet users warmly, use polite and positive language, and help them discover and understand L’Oréal’s extensive range of products—makeup, skincare, haircare, and fragrances—as well as provide personalized routines and recommendations. Keep your responses brief and concise. If the user asks about anything unrelated to L’Oréal products or routines, kindly and professionally say you don't know.",
+  },
+];
+
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // Get the user's message
   const message = userInput.value;
+
+  // Add user's message to conversation history
+  messages.push({ role: "user", content: message });
 
   // Show user's message in the chat window
   chatWindow.innerHTML += `<div class="user-message"><strong>You:</strong> ${message}</div>`;
@@ -22,33 +33,16 @@ chatForm.addEventListener("submit", async (e) => {
   userInput.value = "";
 
   // Show a loading message
-  chatWindow.innerHTML += `<div class="bot-message">Thinking...</div>`;
+  chatWindow.innerHTML += `<div class="bot-message">Processing...</div>`;
   chatWindow.scrollTop = chatWindow.scrollHeight;
 
-  // Prepare the API request
-  if (typeof OPENAI_API_KEY === "undefined" || !OPENAI_API_KEY) {
-    // Remove the loading message and show an error
-    const botMessages = document.querySelectorAll(".bot-message");
-    if (botMessages.length > 0) {
-      botMessages[botMessages.length - 1].remove();
-    }
-    chatWindow.innerHTML += `<div class="bot-message error">Error: No OpenAI API key found. Please add your API key to <code>secrets.js</code>.</div>`;
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-    return;
-  }
-  const apiKey = OPENAI_API_KEY;
-  const endpoint = "https://api.openai.com/v1/chat/completions";
+  // Use Cloudflare Worker proxy endpoint (no API key needed on client)
+  const endpoint = "https://pj8.monahana.workers.dev/";
 
   // Create the request body for the Chat Completions API
   const requestBody = {
     model: "gpt-4o", // Use the gpt-4o model
-    messages: [
-      {
-        role: "system",
-        content: "You are a helpful assistant for L'Oréal product advice.",
-      },
-      { role: "user", content: message },
-    ],
+    messages: messages,
   };
 
   try {
@@ -57,10 +51,16 @@ chatForm.addEventListener("submit", async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(requestBody),
     });
+
+    // Check for HTTP errors
+    if (!response.ok) {
+      throw new Error(
+        `API request failed with status ${response.status}: ${response.statusText}`
+      );
+    }
 
     // Parse the response as JSON
     const data = await response.json();
@@ -74,6 +74,8 @@ chatForm.addEventListener("submit", async (e) => {
       data.choices[0].message.content
     ) {
       reply = data.choices[0].message.content;
+      // Add assistant's reply to conversation history
+      messages.push({ role: "assistant", content: reply });
     }
 
     // Remove the loading message and show the assistant's reply
@@ -91,7 +93,9 @@ chatForm.addEventListener("submit", async (e) => {
     if (botMessages.length > 0) {
       botMessages[botMessages.length - 1].remove();
     }
-    chatWindow.innerHTML += `<div class="bot-message error">Error: ${error.message}</div>`;
+    // Log the error for debugging
+    console.error("OpenAI API error:", error);
+    chatWindow.innerHTML += `<div class="bot-message error">Sorry, something went wrong connecting to the AI. Please try again later.</div>`;
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 });

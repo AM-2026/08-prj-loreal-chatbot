@@ -18,8 +18,20 @@
   <body>
     <div class="page-wrapper">
       <!------- Header / Branding ------->
-      <header class="site-header">
-        <h1 class="site-title">Smart Product Advisor</h1>
+      <header class="site-header enhanced-header">
+        <div class="header-content">
+          <img
+            src="img/loreal-logo.png"
+            alt="L'Oréal Logo"
+            class="header-logo"
+          />
+          <div>
+            <h1 class="site-title">Smart Product Advisor</h1>
+            <p class="site-tagline">
+              Your friendly guide to L'Oréal beauty, skincare, and more!
+            </p>
+          </div>
+        </div>
       </header>
 
       <!------- Chat Area ------->
@@ -30,7 +42,7 @@
           </div>
 
           <form id="chatForm" class="chat-form">
-            <label for="userInput" class="visually-hidden">Message</label>
+            <label for="userInput" class="visually-hidden">Ask away!</label>
             <input
               id="userInput"
               name="userInput"
@@ -48,14 +60,25 @@
       </main>
 
       <!------- Footer Links ------->
-      <footer class="site-footer">
-        <p>&copy; 2025 Company Name. All rights reserved.</p>
-        <nav>
-          <!-- These URLs are placeholders -->
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
-          <a href="#">Contact</a>
-        </nav>
+      <footer class="site-footer enhanced-footer">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <img
+              src="img/loreal-logo.png"
+              alt="L'Oréal Logo"
+              class="footer-logo"
+            />
+            <span class="footer-title">L'Oréal Paris</span>
+          </div>
+          <nav class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Contact</a>
+          </nav>
+        </div>
+        <p class="footer-copy">
+          &copy; 2025 L'Oréal Paris. All rights reserved.
+        </p>
       </footer>
     </div>
 
